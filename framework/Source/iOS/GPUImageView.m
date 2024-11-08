@@ -57,10 +57,13 @@
 {
     if (!(self = [super initWithFrame:frame]))
     {
-		return nil;
+        return nil;
     }
+#pragma mark GPU源码修改
+    self.viewBounds = self.bounds;
     
     [self commonInit];
+    
     
     return self;
 }
@@ -132,16 +135,16 @@
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    
+#pragma mark GPU源码修改
+    self.viewBounds = self.bounds;
     // The frame buffer needs to be trashed and re-created when the view size changes.
     if (!CGSizeEqualToSize(self.bounds.size, boundsSizeAtFrameBufferEpoch) &&
         !CGSizeEqualToSize(self.bounds.size, CGSizeZero)) {
         runSynchronouslyOnVideoProcessingQueue(^{
             [self destroyDisplayFramebuffer];
             [self createDisplayFramebuffer];
+            [self recalculateViewGeometry];
         });
-    } else if (!CGSizeEqualToSize(self.bounds.size, CGSizeZero)) {
-        [self recalculateViewGeometry];
     }
 }
 
@@ -235,12 +238,13 @@
     runSynchronouslyOnVideoProcessingQueue(^{
         CGFloat heightScaling, widthScaling;
         
-        CGSize currentViewSize = self.bounds.size;
+#pragma mark GPU源码修改
+        CGSize currentViewSize = self.viewBounds.size;//self.bounds.size
         
         //    CGFloat imageAspectRatio = inputImageSize.width / inputImageSize.height;
         //    CGFloat viewAspectRatio = currentViewSize.width / currentViewSize.height;
-        
-        CGRect insetRect = AVMakeRectWithAspectRatioInsideRect(inputImageSize, self.bounds);
+#pragma mark GPU源码修改
+        CGRect insetRect = AVMakeRectWithAspectRatioInsideRect(inputImageSize, self.viewBounds);//self.bounds
         
         switch(_fillMode)
         {
